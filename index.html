@@ -65,4 +65,2093 @@
     <!-- Conteúdo Principal -->
     <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
         
-        <!-- Painel
+        <!-- Painel de Menu / Conexão (Lado Esquerdo) -->
+        <section class="lg:col-span-1 flex flex-col gap-6">
+            
+            <!-- Menu de Modos de Jogo -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                <h3 class="text-lg font-bold text-slate-200 border-b border-slate-800 pb-2 flex items-center gap-2">
+                    <i data-lucide="gamepad-2" class="text-pink-500 w-5 h-5"></i> Modos de Jogo
+                </h3>
+                
+                <div class="grid grid-cols-1 gap-2">
+                    <button id="btn-local-mode" class="w-full text-left p-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold shadow-md shadow-indigo-600/10 hover:brightness-110 transition-all flex items-center justify-between">
+                        <span>Passa e Joga (Local)</span>
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </button>
+                    
+                    <button id="btn-lan-mode" class="w-full text-left p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700/50 transition-all flex items-center justify-between">
+                        <span>Multijogador LAN (P2P)</span>
+                        <i data-lucide="wifi" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Painel LAN -->
+                <div id="lan-panel" class="hidden flex flex-col gap-4 mt-2 pt-3 border-t border-slate-800 animate-fadeIn">
+                    
+                    <!-- Abas de Método de Conexão (Manual ativado por defeito para evitar erros de rede) -->
+                    <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                        <button id="tab-manual-lan" class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition-all">
+                            Manual (Sem Servidor)
+                        </button>
+                        <button id="tab-auto-lan" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all">
+                            Automático (PeerJS)
+                        </button>
+                    </div>
+
+                    <!-- SUBPAINEL MANUAL (SEM WEBSOCKETS - À PROVA DE BLOQUEIOS DO CANVAS) -->
+                    <div id="panel-manual-lan" class="flex flex-col gap-3">
+                        <div class="bg-indigo-950/20 border border-indigo-900/30 p-2.5 rounded-xl text-xs text-indigo-300 leading-relaxed">
+                            <span class="font-bold text-amber-400 block mb-0.5">💡 Ligação Segura no Canvas:</span>
+                            Este modo não usa servidores externos! Troque os códigos diretamente com o seu amigo por chat para conectar sem erros de WebSocket.
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-900">
+                            <button id="btn-manual-role-host" class="py-1 text-xs font-bold rounded bg-indigo-600 text-white transition-all">Anfitrião (Host)</button>
+                            <button id="btn-manual-role-client" class="py-1 text-xs font-bold rounded text-slate-400 hover:text-slate-200 transition-all">Convidado</button>
+                        </div>
+
+                        <!-- Manual Host Controls -->
+                        <div id="manual-host-section" class="flex flex-col gap-2.5">
+                            <div>
+                                <label class="text-[11px] text-slate-400 font-semibold block mb-1">1. Crie o Convite (SDP Offer):</label>
+                                <button id="btn-manual-gen-offer" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition-colors">
+                                    Gerar Código de Convite
+                                </button>
+                                <textarea id="manual-offer-output" readonly placeholder="O seu código de convite aparecerá aqui..." class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[10px] text-indigo-300 w-full font-mono mt-1.5 h-16 outline-none resize-none"></textarea>
+                                <button id="btn-copy-manual-offer" class="w-full py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] rounded font-semibold mt-1 flex items-center justify-center gap-1">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Código de Convite
+                                </button>
+                            </div>
+                            <div class="border-t border-slate-900 my-1"></div>
+                            <div>
+                                <label class="text-[11px] text-slate-400 font-semibold block mb-1">2. Cole a Resposta do Convidado (Answer):</label>
+                                <textarea id="manual-answer-input" placeholder="Cole o código de resposta aqui..." class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-200 w-full font-mono h-14 outline-none resize-none"></textarea>
+                                <button id="btn-manual-connect-host" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg mt-1 transition-colors">
+                                    Confirmar Ligação Direta
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Manual Client Controls -->
+                        <div id="manual-client-section" class="hidden flex flex-col gap-2.5">
+                            <div>
+                                <label class="text-[11px] text-slate-400 font-semibold block mb-1">1. Cole o Convite do Anfitrião:</label>
+                                <textarea id="manual-client-offer-input" placeholder="Cole o código de convite aqui..." class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-200 w-full font-mono h-14 outline-none resize-none"></textarea>
+                            </div>
+                            <div class="border-t border-slate-900 my-1"></div>
+                            <div>
+                                <label class="text-[11px] text-slate-400 font-semibold block mb-1">2. Crie e Envie a sua Resposta:</label>
+                                <button id="btn-manual-gen-answer" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition-colors">
+                                    Gerar Código de Resposta
+                                </button>
+                                <textarea id="manual-client-answer-output" readonly placeholder="O seu código de resposta aparecerá aqui..." class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[10px] text-indigo-300 w-full font-mono mt-1.5 h-16 outline-none resize-none"></textarea>
+                                <button id="btn-copy-manual-answer" class="w-full py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] rounded font-semibold mt-1 flex items-center justify-center gap-1">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Código de Resposta
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBPAINEL AUTOMÁTICO (PEERJS - RESTRITO/OPCIONAL) -->
+                    <div id="panel-auto-lan" class="hidden flex flex-col gap-3">
+                        <div class="bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
+                            <button id="btn-toggle-server-settings" class="w-full flex items-center justify-between text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
+                                <span class="flex items-center gap-1.5"><i data-lucide="settings-2" class="w-3.5 h-3.5"></i> Servidor de Sinalização</span>
+                                <i data-lucide="chevron-down" id="server-settings-chevron" class="w-4 h-4 transition-transform"></i>
+                            </button>
+                            
+                            <div id="server-settings-container" class="hidden flex flex-col gap-2.5 mt-3 pt-3 border-t border-slate-900">
+                                <div>
+                                    <label class="text-[10px] text-slate-400 font-mono block mb-1">PRESET:</label>
+                                    <select id="peer-preset" class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-200 w-full outline-none">
+                                        <option value="cloud">Cloud Pública (0.peerjs.com)</option>
+                                        <option value="local">LAN Local (localhost / IP próprio)</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-3 gap-1.5">
+                                    <div class="col-span-2">
+                                        <label class="text-[9px] text-slate-500 font-mono block">HOST</label>
+                                        <input id="peer-host" type="text" value="0.peerjs.com" class="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-full font-mono outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] text-slate-500 font-mono block">PORTA</label>
+                                        <input id="peer-port" type="number" value="443" class="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-full font-mono outline-none">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <div>
+                                        <label class="text-[9px] text-slate-500 font-mono block">CAMINHO</label>
+                                        <input id="peer-path" type="text" value="/" class="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-full font-mono outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-4 pl-1">
+                                        <input id="peer-secure" type="checkbox" checked class="rounded border-slate-800 text-indigo-600 bg-slate-900 focus:ring-0">
+                                        <label for="peer-secure" class="text-[10px] text-slate-400 font-mono cursor-pointer">SSL</label>
+                                    </div>
+                                </div>
+                                <button id="btn-reconnect-server" class="w-full py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 rounded-lg text-xs font-bold border border-indigo-500/20 transition-all flex items-center justify-center gap-1">
+                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Conectar ao Servidor
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-slate-400 font-semibold block mb-1">O seu ID de Rede:</label>
+                            <div class="flex gap-2">
+                                <input id="my-peer-id" type="text" readonly class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-indigo-300 w-full font-mono outline-none" value="Clique em 'Conectar ao Servidor'...">
+                                <button id="btn-copy-id" class="p-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white transition-colors" title="Copiar ID">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-slate-400 font-semibold block mb-1">Conectar a um Amigo (Insira o ID dele):</label>
+                            <div class="flex gap-2">
+                                <input id="peer-id-input" type="text" placeholder="Cole o ID aqui..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 w-full outline-none">
+                                <button id="btn-connect-peer" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-semibold text-sm transition-colors flex items-center gap-1">
+                                    <i data-lucide="link" class="w-4 h-4"></i> Ligar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Painel de Armas e Inventário -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                <h3 class="text-lg font-bold text-slate-200 border-b border-slate-800 pb-2 flex items-center gap-2">
+                    <i data-lucide="swords" class="text-indigo-400 w-5 h-5"></i> Arsenal de Combate
+                </h3>
+                <div id="weapons-list" class="grid grid-cols-2 gap-2">
+                    <!-- Gerado dinamicamente -->
+                </div>
+                <div class="text-xs text-slate-400 bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed">
+                    <span class="text-amber-500 font-bold block mb-1">Como Jogar:</span>
+                    <ul class="list-disc pl-4 space-y-1">
+                        <li><kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200 font-mono text-[10px]">A</kbd> / <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200 font-mono text-[10px]">D</kbd> - Mover Minhoca</li>
+                        <li><kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200 font-mono text-[10px]">W</kbd> / <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200 font-mono text-[10px]">S</kbd> - Mirar Ângulo</li>
+                        <li><kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200 font-mono text-[10px]">Espaço</kbd> - Manter premido para Força e Soltar para Disparar</li>
+                        <li><kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200 font-mono text-[10px]">Enter</kbd> - Saltar</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Canvas do Jogo (Lado Direito / Central) -->
+        <section class="lg:col-span-3 flex flex-col gap-4">
+            
+            <!-- Barra de Status do Jogo Atual -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="bg-indigo-600/10 border border-indigo-500/20 px-4 py-2 rounded-xl text-center">
+                        <span class="text-xs text-indigo-400 block font-semibold uppercase tracking-wider">Vento</span>
+                        <div class="flex items-center justify-center gap-1">
+                            <span id="wind-direction-arrow" class="inline-block transition-transform duration-300">➜</span>
+                            <span id="wind-value" class="font-bold text-slate-100">0 km/h</span>
+                        </div>
+                    </div>
+                    
+                    <div id="turn-timer-container" class="bg-rose-600/10 border border-rose-500/20 px-4 py-2 rounded-xl text-center">
+                        <span class="text-xs text-rose-400 block font-semibold uppercase tracking-wider">Tempo Restante</span>
+                        <span id="turn-timer" class="font-bold text-rose-400 text-lg font-mono">45s</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div id="active-player-display" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 font-bold border border-slate-700">
+                        Aguardando Início...
+                    </div>
+                    <button id="btn-restart" class="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/20">
+                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Novo Jogo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Área do Jogo / Canvas -->
+            <div class="relative bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl aspect-[2/1] w-full">
+                <canvas id="game-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+                
+                <!-- Overlay de Notificação do Jogo -->
+                <div id="game-overlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 transition-all duration-300 pointer-events-none opacity-0 z-20">
+                    <div class="max-w-md bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl scale-95 transition-transform duration-300 transform" id="overlay-content">
+                        <h2 id="overlay-title" class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-indigo-400 mb-4 tracking-tight">Preparar para a Batalha</h2>
+                        <p id="overlay-message" class="text-slate-300 mb-6 leading-relaxed">Selecione um modo de jogo à esquerda para começar ou conectar a um amigo por LAN!</p>
+                        <button id="overlay-action-btn" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all">Começar Local</button>
+                    </div>
+                </div>
+
+                <!-- Indicador de Mira / Força Visível em Mobile/Touch -->
+                <div id="touch-controls" class="absolute bottom-4 left-4 right-4 flex justify-between items-center pointer-events-none md:hidden z-10">
+                    <div class="flex gap-2 pointer-events-auto">
+                        <button id="ctrl-left" class="w-12 h-12 bg-slate-900/90 active:bg-indigo-600 text-slate-200 rounded-full border border-slate-800 flex items-center justify-center text-xl shadow-lg"><i data-lucide="arrow-left"></i></button>
+                        <button id="ctrl-right" class="w-12 h-12 bg-slate-900/90 active:bg-indigo-600 text-slate-200 rounded-full border border-slate-800 flex items-center justify-center text-xl shadow-lg"><i data-lucide="arrow-right"></i></button>
+                    </div>
+                    <div class="flex gap-2 pointer-events-auto">
+                        <button id="ctrl-jump" class="w-12 h-12 bg-slate-900/90 active:bg-indigo-600 text-slate-200 rounded-full border border-slate-800 flex items-center justify-center text-xl shadow-lg"><i data-lucide="chevrons-up"></i></button>
+                        <button id="ctrl-fire" class="w-16 h-16 bg-rose-600 active:bg-rose-700 text-white rounded-full border border-rose-500 flex items-center justify-center text-xl shadow-lg font-bold">FOGO</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat / Log de Combate -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col h-40">
+                <div class="text-xs text-slate-400 font-bold border-b border-slate-800 pb-1.5 flex justify-between items-center">
+                    <span>REGISTO DE COMBATE & CONVERSA</span>
+                    <span id="chat-mode" class="text-indigo-400">Modo Local Ativo</span>
+                </div>
+                <div id="chat-messages" class="flex-1 overflow-y-auto py-2 flex flex-col gap-1 text-sm font-mono">
+                    <div class="text-indigo-400">[Sistema] Jogo inicializado com sucesso. Prima 'Novo Jogo' para gerar novo terreno!</div>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <input id="chat-input" type="text" placeholder="Envie uma mensagem ou provocação..." class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500 transition-colors">
+                    <button id="btn-send-chat" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors">Enviar</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="relative z-10 border-t border-slate-900 bg-slate-950/60 py-4 text-center text-xs text-slate-500 mt-auto">
+        <p>© 2026 Worms LAN Battle - Desenvolvido como aplicação estática leve de alta fidelidade para Redes Locais.</p>
+    </footer>
+
+    <!-- Script Principal com Lógica do Jogo -->
+    <script>
+        // --- CONSTANTES DO JOGO ---
+        const WIDTH = 1200;
+        const HEIGHT = 600;
+        const WATER_LEVEL = 540;
+        const GRAVITY = 0.25;
+        const WORM_RADIUS = 10;
+        const MAX_WIND = 0.5;
+
+        // --- SISTEMA DE ÁUDIO SINTETIZADO (Web Audio API) ---
+        class AudioManager {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playShoot() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playExplosion() {
+                if (!this.enabled) return;
+                this.init();
+                const bufferSize = this.ctx.sampleRate * 0.8;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(300, this.ctx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.7);
+
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.8);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                noise.start();
+                noise.stop(this.ctx.currentTime + 0.8);
+            }
+
+            playJump() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playSplash() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, this.ctx.currentTime + 0.5);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.5);
+            }
+        }
+        const audio = new AudioManager();
+
+        // --- ARSENAL / ARMAS CONFIG ---
+        const WEAPONS = [
+            { id: 'bazooka', name: 'Bazuca', icon: 'rocket', type: 'projectile', speedFactor: 1.2, radius: 45, damage: 55, count: -1, description: 'Projétil clássico afetado pelo vento e gravidade.' },
+            { id: 'grenade', name: 'Granada', icon: 'bomb', type: 'bouncing', speedFactor: 0.9, radius: 55, damage: 65, count: 5, description: 'Faz ricochete no terreno e detona após 3 segundos.' },
+            { id: 'airstrike', name: 'Ataque Aéreo', icon: 'plane-takeoff', type: 'target', speedFactor: 0, radius: 40, damage: 45, count: 2, description: 'Chove mísseis vindos do céu no ponto selecionado.' }
+        ];
+
+        // --- ESTADO DO JOGO ---
+        const state = {
+            mode: 'local', // 'local' ou 'lan'
+            peer: null,
+            conn: null,
+            isHost: true,
+            myId: '',
+            peerId: '',
+            gameStarted: false,
+            winner: null,
+            
+            // Turnos e Vento
+            activeTeam: 0, // 0: Equipa Vermelha, 1: Equipa Azul
+            activeWormIndex: { 0: 0, 1: 0 },
+            turnTimeLeft: 45,
+            wind: 0, // -MAX_WIND a MAX_WIND
+            windTarget: 0,
+            
+            // Coleções de Entidades
+            teams: [
+                { name: 'Equipa Vermelha', color: '#f43f5e', worms: [] },
+                { name: 'Equipa Azul', color: '#3b82f6', worms: [] }
+            ],
+            projectiles: [],
+            particles: [],
+            terrain: [], // Matriz booleana de colisões: [x][y]
+            
+            // Controlos de Ação Ativos
+            selectedWeaponIndex: 0,
+            aimAngle: -Math.PI / 4, // Ângulo padrão apontando para cima e direita
+            chargePower: 0,
+            isCharging: false,
+            aimingUp: false,
+            aimingDown: false,
+            movingLeft: false,
+            movingRight: false,
+            shotFiredInTurn: false,
+            postShotTimer: null,
+            
+            // Instância manual WebRTC (para contornar bloqueio WebSocket do Canvas)
+            manualPC: null,
+            manualChannel: null,
+            
+            // Estatísticas
+            stats: { winsRed: 0, winsBlue: 0 }
+        };
+
+        // --- SETUP CANVAS E OFFSCREEN ---
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+
+        // Canvas de renderização do Terreno (para manipulação de píxeis rápida)
+        const terrainCanvas = document.createElement('canvas');
+        const terrainCtx = terrainCanvas.getContext('2d');
+        terrainCanvas.width = WIDTH;
+        terrainCanvas.height = HEIGHT;
+
+        // --- INICIALIZAÇÃO DE EVENTOS E UI ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initUI();
+            resetGame(true);
+            requestAnimationFrame(gameLoop);
+        });
+
+        function initUI() {
+            // Alternar Som
+            document.getElementById('sfx-toggle').addEventListener('click', () => {
+                audio.enabled = !audio.enabled;
+                const icon = document.getElementById('sfx-toggle').querySelector('i');
+                if (audio.enabled) {
+                    icon.setAttribute('data-lucide', 'volume-2');
+                    addLog('[Sistema] Efeitos sonoros ativados.');
+                } else {
+                    icon.setAttribute('data-lucide', 'volume-x');
+                    addLog('[Sistema] Efeitos sonoros desativados.');
+                }
+                lucide.createIcons();
+            });
+
+            // Modos de Jogo
+            document.getElementById('btn-local-mode').addEventListener('click', () => {
+                switchGameMode('local');
+            });
+            document.getElementById('btn-lan-mode').addEventListener('click', () => {
+                switchGameMode('lan');
+            });
+
+            // Abas de Métodos LAN (Manual vs Automático)
+            const tabAuto = document.getElementById('tab-auto-lan');
+            const tabManual = document.getElementById('tab-manual-lan');
+            const panelAuto = document.getElementById('panel-auto-lan');
+            const panelManual = document.getElementById('panel-manual-lan');
+
+            tabAuto.addEventListener('click', () => {
+                tabAuto.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition-all";
+                tabManual.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+                panelAuto.classList.remove('hidden');
+                panelManual.classList.add('hidden');
+                initPeer(); // Inicializa o Peer se necessário
+            });
+
+            tabManual.addEventListener('click', () => {
+                tabManual.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition-all";
+                tabAuto.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+                panelManual.classList.remove('hidden');
+                panelAuto.classList.add('hidden');
+                disconnectPeer(); // Desativa PeerJS para libertar recursos
+            });
+
+            // Conexão PeerJS (Automática)
+            document.getElementById('btn-copy-id').addEventListener('click', () => {
+                const idInput = document.getElementById('my-peer-id');
+                if (state.myId) {
+                    idInput.select();
+                    document.execCommand('copy');
+                    addLog('[Rede] ID de Sala copiado com sucesso!');
+                } else {
+                    addLog('[Erro] Ainda não tem um ID gerado. Clique em "Conectar ao Servidor" primeiro.');
+                }
+            });
+
+            document.getElementById('btn-connect-peer').addEventListener('click', () => {
+                const partnerId = document.getElementById('peer-id-input').value.trim();
+                if (partnerId) {
+                    connectToPeer(partnerId);
+                } else {
+                    addLog('[Erro] Por favor insira um ID de parceiro válido.');
+                }
+            });
+
+            // Definições de Rede Avançadas (PeerJS)
+            const btnToggleSettings = document.getElementById('btn-toggle-server-settings');
+            const settingsContainer = document.getElementById('server-settings-container');
+            const settingsChevron = document.getElementById('server-settings-chevron');
+            
+            btnToggleSettings.addEventListener('click', () => {
+                const isHidden = settingsContainer.classList.contains('hidden');
+                if (isHidden) {
+                    settingsContainer.classList.remove('hidden');
+                    settingsChevron.style.transform = 'rotate(180deg)';
+                } else {
+                    settingsContainer.classList.add('hidden');
+                    settingsChevron.style.transform = 'rotate(0deg)';
+                }
+            });
+
+            const peerPreset = document.getElementById('peer-preset');
+            const hostInput = document.getElementById('peer-host');
+            const portInput = document.getElementById('peer-port');
+            const pathInput = document.getElementById('peer-path');
+            const secureCheck = document.getElementById('peer-secure');
+
+            peerPreset.addEventListener('change', () => {
+                if (peerPreset.value === 'cloud') {
+                    hostInput.value = '0.peerjs.com';
+                    portInput.value = '443';
+                    pathInput.value = '/';
+                    secureCheck.checked = true;
+                } else if (peerPreset.value === 'local') {
+                    hostInput.value = 'localhost';
+                    portInput.value = '9000';
+                    pathInput.value = '/';
+                    secureCheck.checked = false;
+                }
+            });
+
+            document.getElementById('btn-reconnect-server').addEventListener('click', () => {
+                addLog('[Rede] A reconfigurar e reiniciar ligação com o servidor...');
+                disconnectPeer();
+                initPeer();
+            });
+
+            // --- Lógica de Conexão LAN Manual (Sem Servidor) ---
+            const btnRoleHost = document.getElementById('btn-manual-role-host');
+            const btnRoleClient = document.getElementById('btn-manual-role-client');
+            const sectHost = document.getElementById('manual-host-section');
+            const sectClient = document.getElementById('manual-client-section');
+
+            btnRoleHost.addEventListener('click', () => {
+                btnRoleHost.className = "py-1 text-xs font-bold rounded bg-indigo-600 text-white transition-all";
+                btnRoleClient.className = "py-1 text-xs font-bold rounded text-slate-400 hover:text-slate-200 transition-all";
+                sectHost.classList.remove('hidden');
+                sectClient.classList.add('hidden');
+                state.isHost = true;
+            });
+
+            btnRoleClient.addEventListener('click', () => {
+                btnRoleClient.className = "py-1 text-xs font-bold rounded bg-indigo-600 text-white transition-all";
+                btnRoleHost.className = "py-1 text-xs font-bold rounded text-slate-400 hover:text-slate-200 transition-all";
+                sectClient.classList.remove('hidden');
+                sectHost.classList.add('hidden');
+                state.isHost = false;
+            });
+
+            // Host Manual: Gerar Offer
+            document.getElementById('btn-manual-gen-offer').addEventListener('click', () => {
+                setupManualWebRTC(true);
+            });
+
+            // Host Manual: Confirmar Resposta (Answer)
+            document.getElementById('btn-manual-connect-host').addEventListener('click', () => {
+                const answerRaw = document.getElementById('manual-answer-input').value.trim();
+                if (!answerRaw) {
+                    addLog('[Erro] Por favor cole o código de resposta gerado pelo seu amigo.');
+                    return;
+                }
+                try {
+                    const answerDesc = new RTCSessionDescription(JSON.parse(atob(answerRaw)));
+                    state.manualPC.setRemoteDescription(answerDesc).then(() => {
+                        addLog('[Manual] Resposta do convidado registada! A estabelecer ligação...');
+                    });
+                } catch (e) {
+                    addLog('[Erro] Código de resposta inválido ou corrompido.');
+                    console.error(e);
+                }
+            });
+
+            // Client Manual: Gerar Resposta a partir do Offer
+            document.getElementById('btn-manual-gen-answer').addEventListener('click', () => {
+                setupManualWebRTC(false);
+            });
+
+            // Copiar botões manuais
+            document.getElementById('btn-copy-manual-offer').addEventListener('click', () => {
+                const area = document.getElementById('manual-offer-output');
+                if (area.value) {
+                    area.select();
+                    document.execCommand('copy');
+                    addLog('[Manual] Convite copiado! Envie ao Convidado.');
+                }
+            });
+
+            document.getElementById('btn-copy-manual-answer').addEventListener('click', () => {
+                const area = document.getElementById('manual-client-answer-output');
+                if (area.value) {
+                    area.select();
+                    document.execCommand('copy');
+                    addLog('[Manual] Resposta copiada! Envie de volta ao Anfitrião.');
+                }
+            });
+
+            // Reiniciar Jogo
+            document.getElementById('btn-restart').addEventListener('click', () => {
+                if (state.mode === 'lan') {
+                    if (state.isHost) {
+                        resetGame(true);
+                        sendNetworkMessage('RESET_GAME', { seed: Math.random() });
+                    } else {
+                        addLog('[Combate] Apenas o Anfitrião do jogo pode reiniciar a partida.');
+                    }
+                } else {
+                    resetGame(true);
+                }
+            });
+
+            // Enviar mensagem Chat
+            document.getElementById('btn-send-chat').addEventListener('click', sendChatMessage);
+            document.getElementById('chat-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') sendChatMessage();
+            });
+
+            // Overlay Action Button
+            document.getElementById('overlay-action-btn').addEventListener('click', () => {
+                hideOverlay();
+                resetGame(true);
+            });
+
+            // Controlos de toque (Mobile)
+            setupTouchControls();
+
+            // Controlos de Teclado (Desktop)
+            setupKeyboardControls();
+        }
+
+        // --- SISTEMA DE CONTROLOS POR TECLADO ---
+        function setupKeyboardControls() {
+            window.addEventListener('keydown', (e) => {
+                if (document.activeElement === document.getElementById('chat-input') || 
+                    document.activeElement === document.getElementById('peer-id-input') ||
+                    document.activeElement === document.getElementById('peer-host') ||
+                    document.activeElement === document.getElementById('peer-port') ||
+                    document.activeElement === document.getElementById('peer-path') ||
+                    document.activeElement?.tagName === 'TEXTAREA') {
+                    return; // Ignorar se estiver a escrever
+                }
+
+                if (!state.gameStarted || state.winner || (state.mode === 'lan' && !isMyTurn())) return;
+
+                const key = e.key.toLowerCase();
+                const activeWorm = getActiveWorm();
+                if (!activeWorm || activeWorm.isDead) return;
+
+                if (key === 'a' || key === 'arrowleft') state.movingLeft = true;
+                if (key === 'd' || key === 'arrowright') state.movingRight = true;
+                if (key === 'w' || key === 'arrowup') state.aimingUp = true;
+                if (key === 's' || key === 'arrowdown') state.aimingDown = true;
+
+                if (key === 'enter') {
+                    if (activeWorm.onGround && !state.shotFiredInTurn) {
+                        activeWorm.vy = -5.5;
+                        activeWorm.vx = activeWorm.facingLeft ? -2 : 2;
+                        activeWorm.onGround = false;
+                        audio.playJump();
+                        syncWormState(activeWorm);
+                    }
+                }
+
+                if (e.key === ' ' && !state.isCharging && !state.shotFiredInTurn) {
+                    state.isCharging = true;
+                    state.chargePower = 0;
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (document.activeElement === document.getElementById('chat-input') || 
+                    document.activeElement === document.getElementById('peer-id-input') ||
+                    document.activeElement === document.getElementById('peer-host') ||
+                    document.activeElement === document.getElementById('peer-port') ||
+                    document.activeElement === document.getElementById('peer-path') ||
+                    document.activeElement?.tagName === 'TEXTAREA') {
+                    return;
+                }
+
+                const key = e.key.toLowerCase();
+                if (key === 'a' || key === 'arrowleft') state.movingLeft = false;
+                if (key === 'd' || key === 'arrowright') state.movingRight = false;
+                if (key === 'w' || key === 'arrowup') state.aimingUp = false;
+                if (key === 's' || key === 'arrowdown') state.aimingDown = false;
+
+                if (e.key === ' ' && state.isCharging) {
+                    state.isCharging = false;
+                    fireWeapon();
+                }
+            });
+        }
+
+        // --- CONTROLOS MÓVEIS / TOUCH ARROWS ---
+        function setupTouchControls() {
+            const bindTouch = (id, startProp, startVal, endProp, endVal) => {
+                const el = document.getElementById(id);
+                el.addEventListener('mousedown', () => { state[startProp] = startVal; });
+                el.addEventListener('mouseup', () => { state[endProp] = endVal; });
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); state[startProp] = startVal; });
+                el.addEventListener('touchend', (e) => { e.preventDefault(); state[endProp] = endVal; });
+            };
+
+            bindTouch('ctrl-left', 'movingLeft', true, 'movingLeft', false);
+            bindTouch('ctrl-right', 'movingRight', true, 'movingRight', false);
+
+            const btnJump = document.getElementById('ctrl-jump');
+            const handleJump = (e) => {
+                e.preventDefault();
+                const activeWorm = getActiveWorm();
+                if (activeWorm && activeWorm.onGround && !state.shotFiredInTurn && isMyTurn()) {
+                    activeWorm.vy = -5.5;
+                    activeWorm.vx = activeWorm.facingLeft ? -2 : 2;
+                    activeWorm.onGround = false;
+                    audio.playJump();
+                    syncWormState(activeWorm);
+                }
+            };
+            btnJump.addEventListener('click', handleJump);
+            btnJump.addEventListener('touchstart', handleJump);
+
+            const btnFire = document.getElementById('ctrl-fire');
+            btnFire.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!state.isCharging && !state.shotFiredInTurn && isMyTurn()) {
+                    state.isCharging = true;
+                    state.chargePower = 0;
+                }
+            });
+            btnFire.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                if (state.isCharging) {
+                    state.isCharging = false;
+                    fireWeapon();
+                }
+            });
+            btnFire.addEventListener('mousedown', () => {
+                if (!state.isCharging && !state.shotFiredInTurn && isMyTurn()) {
+                    state.isCharging = true;
+                    state.chargePower = 0;
+                }
+            });
+            btnFire.addEventListener('mouseup', () => {
+                if (state.isCharging) {
+                    state.isCharging = false;
+                    fireWeapon();
+                }
+            });
+        }
+
+        // --- SISTEMA MULTIJOGADOR P2P ---
+        function switchGameMode(mode) {
+            state.mode = mode;
+            const lanPanel = document.getElementById('lan-panel');
+            const chatMode = document.getElementById('chat-mode');
+
+            if (mode === 'lan') {
+                lanPanel.classList.remove('hidden');
+                chatMode.innerText = 'Modo LAN P2P Ativo';
+                document.getElementById('btn-lan-mode').classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-violet-600', 'text-white');
+                document.getElementById('btn-local-mode').classList.remove('bg-gradient-to-r', 'from-indigo-600', 'to-violet-600', 'text-white');
+                document.getElementById('btn-local-mode').classList.add('bg-slate-800');
+                
+                // Inicializa o modo ativo por defeito. Sendo o manual, não ligamos o PeerJS para prevenir erros de Consola.
+                if (document.getElementById('panel-auto-lan').classList.contains('hidden')) {
+                    addLog('[Sistema] Modo Manual selecionado. Siga os passos indicados para estabelecer ligação.');
+                } else {
+                    initPeer();
+                }
+            } else {
+                lanPanel.classList.add('hidden');
+                chatMode.innerText = 'Modo Local Ativo';
+                document.getElementById('btn-local-mode').classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-violet-600', 'text-white');
+                document.getElementById('btn-lan-mode').classList.remove('bg-gradient-to-r', 'from-indigo-600', 'to-violet-600', 'text-white');
+                document.getElementById('btn-lan-mode').classList.add('bg-slate-800');
+                disconnectPeer();
+                disconnectManualWebRTC();
+                resetGame(true);
+            }
+        }
+
+        function initPeer() {
+            if (state.peer) return;
+
+            const host = document.getElementById('peer-host').value.trim() || '0.peerjs.com';
+            const port = parseInt(document.getElementById('peer-port').value.trim()) || 443;
+            const path = document.getElementById('peer-path').value.trim() || '/';
+            const secure = document.getElementById('peer-secure').checked;
+
+            addLog(`[Rede] A tentar ligar ao servidor de sinalização (${host}:${port}${path})...`);
+            
+            try {
+                state.peer = new Peer(null, {
+                    host: host,
+                    port: port,
+                    path: path,
+                    secure: secure,
+                    debug: 1,
+                    config: {
+                        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                    }
+                });
+
+                state.peer.on('open', (id) => {
+                    state.myId = id;
+                    document.getElementById('my-peer-id').value = id;
+                    addLog(`[Rede] Registado com sucesso! ID da sua Sala LAN: ${id}`);
+                    updateConnectionStatus(false, 'Aguardando oponente...');
+                });
+
+                state.peer.on('connection', (conn) => {
+                    if (state.conn) {
+                        conn.close();
+                        return;
+                    }
+                    state.conn = conn;
+                    state.isHost = true;
+                    setupConnectionListeners();
+                    updateConnectionStatus(true, 'Host - Ligado!');
+                    addLog('[Rede] Um oponente entrou na sua arena!');
+                    hideOverlay();
+                    resetGame(true);
+                });
+
+                state.peer.on('error', (err) => {
+                    console.warn('Erro capturado no PeerJS:', err);
+                    
+                    if (err.type === 'socket-error' || err.type === 'network' || err.type === 'peer-unavailable' || err.message.includes('WebSocket')) {
+                        addLog(`[Erro de Rede] Bloqueio de WebSocket detetado! Utilize o modo "Manual (Sem Servidor)" para contornar limites de segurança.`);
+                    } else {
+                        addLog(`[Erro de Rede] Tipo: ${err.type} - ${err.message}`);
+                    }
+                    updateConnectionStatus(false, 'Erro de Ligação');
+                });
+                
+            } catch (err) {
+                console.error('Erro ao instanciar PeerJS:', err);
+                addLog(`[Erro de Segurança] O browser impediu a ligação ao servidor automático. Utilize o modo "Manual (Sem Servidor)" para jogar.`);
+                updateConnectionStatus(false, 'Bloqueio Iframe');
+            }
+        }
+
+        function disconnectPeer() {
+            try {
+                if (state.conn) state.conn.close();
+                if (state.peer) state.peer.destroy();
+            } catch (e) {
+                console.warn(e);
+            }
+            state.peer = null;
+            state.conn = null;
+            state.myId = '';
+            document.getElementById('my-peer-id').value = 'Servidor inativo.';
+            if (state.mode === 'lan' && !state.manualChannel) {
+                updateConnectionStatus(false, 'Desconectado (LAN)');
+            }
+        }
+
+        function connectToPeer(targetId) {
+            if (!state.peer) {
+                addLog('[Rede] Certifique-se de que o servidor de sinalização está ativo.');
+                return;
+            }
+            addLog(`[Rede] A ligar a: ${targetId}...`);
+            state.conn = state.peer.connect(targetId);
+            state.isHost = false;
+            setupConnectionListeners();
+        }
+
+        function setupConnectionListeners() {
+            state.conn.on('open', () => {
+                updateConnectionStatus(true, state.isHost ? 'Host - Conectado' : 'Cliente - Conectado');
+                addLog('[Rede] Ligação P2P estabelecida!');
+                hideOverlay();
+                
+                if (!state.isHost) {
+                    sendNetworkMessage('REQUEST_INIT_STATE', {});
+                }
+            });
+
+            state.conn.on('data', (data) => {
+                handleNetworkMessage(data);
+            });
+
+            state.conn.on('close', () => {
+                updateConnectionStatus(false, 'Conexão Perdida');
+                addLog('[Rede] O seu oponente abandonou la arena.');
+                state.conn = null;
+                showOverlay('Conexão Perdida', 'O outro jogador desconectou-se do combate.', 'Jogar Localmente');
+            });
+        }
+
+
+        // --- SISTEMA MULTIJOGADOR MANUAL (WEBRTC DIRETO - SEM WEBSOCKETS) ---
+        function setupManualWebRTC(isHost) {
+            disconnectManualWebRTC();
+            disconnectPeer();
+
+            addLog(`[Manual] A inicializar interface WebRTC local (${isHost ? 'Anfitrião' : 'Convidado'})...`);
+
+            const iceConfig = {
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            };
+
+            try {
+                const pc = new RTCPeerConnection(iceConfig);
+                state.manualPC = pc;
+
+                if (isHost) {
+                    const dc = pc.createDataChannel("worms-manual-channel", { negotiated: false });
+                    setupManualDataChannel(dc);
+
+                    pc.onicecandidate = (e) => {
+                        if (!e.candidate) {
+                            displayManualOffer(pc.localDescription);
+                        }
+                    };
+
+                    pc.createOffer().then(offer => pc.setLocalDescription(offer));
+
+                    setTimeout(() => {
+                        if (pc.localDescription && !document.getElementById('manual-offer-output').value) {
+                            displayManualOffer(pc.localDescription);
+                        }
+                    }, 1200);
+
+                } else {
+                    const hostOfferRaw = document.getElementById('manual-client-offer-input').value.trim();
+                    if (!hostOfferRaw) {
+                        addLog('[Erro] Cole o Código de Convite do Anfitrião no Passo 1.');
+                        return;
+                    }
+
+                    const offerDesc = new RTCSessionDescription(JSON.parse(atob(hostOfferRaw)));
+
+                    pc.ondatachannel = (e) => {
+                        setupManualDataChannel(e.channel);
+                    };
+
+                    pc.onicecandidate = (e) => {
+                        if (!e.candidate) {
+                            displayManualAnswer(pc.localDescription);
+                        }
+                    };
+
+                    pc.setRemoteDescription(offerDesc)
+                      .then(() => pc.createAnswer())
+                      .then(answer => pc.setLocalDescription(answer));
+
+                    setTimeout(() => {
+                        if (pc.localDescription && !document.getElementById('manual-client-answer-output').value) {
+                            displayManualAnswer(pc.localDescription);
+                        }
+                    }, 1200);
+                }
+
+            } catch (err) {
+                console.error(err);
+                addLog('[Erro] Não foi possível criar a ligação WebRTC manual no seu browser.');
+            }
+        }
+
+        function displayManualOffer(localDesc) {
+            const offerB64 = btoa(JSON.stringify(localDesc));
+            document.getElementById('manual-offer-output').value = offerB64;
+            addLog('[Manual] Convite Gerado! Copie o código abaixo e envie ao seu amigo.');
+        }
+
+        function displayManualAnswer(localDesc) {
+            const answerB64 = btoa(JSON.stringify(localDesc));
+            document.getElementById('manual-client-answer-output').value = answerB64;
+            addLog('[Manual] Resposta Gerada! Copie o código gerado no Passo 2 e envie ao Anfitrião.');
+        }
+
+        function setupManualDataChannel(channel) {
+            state.manualChannel = channel;
+
+            channel.onopen = () => {
+                addLog('[Manual] Canal de dados aberto com sucesso!');
+                
+                state.conn = {
+                    open: true,
+                    send: (data) => {
+                        if (channel.readyState === 'open') {
+                            channel.send(JSON.stringify(data));
+                        }
+                    },
+                    close: () => {
+                        channel.close();
+                    }
+                };
+
+                updateConnectionStatus(true, state.isHost ? 'Host - Conectado (Manual)' : 'Convidado - Conectado (Manual)');
+                hideOverlay();
+                
+                if (!state.isHost) {
+                    sendNetworkMessage('REQUEST_INIT_STATE', {});
+                }
+            };
+
+            channel.onmessage = (e) => {
+                try {
+                    const parsed = JSON.parse(e.data);
+                    handleNetworkMessage(parsed);
+                } catch (err) {
+                    console.warn("Erro ao ler pacote manual:", err);
+                }
+            };
+
+            channel.onclose = () => {
+                addLog('[Manual] A ligação manual fechou.');
+                updateConnectionStatus(false, 'Desconectado');
+                state.conn = null;
+                showOverlay('Conexão Perdida', 'O outro jogador desconectou-se do combate.', 'Jogar Localmente');
+            };
+        }
+
+        function disconnectManualWebRTC() {
+            if (state.manualChannel) {
+                try { state.manualChannel.close(); } catch(e){}
+            }
+            if (state.manualPC) {
+                try { state.manualPC.close(); } catch(e){}
+            }
+            state.manualChannel = null;
+            state.manualPC = null;
+            document.getElementById('manual-offer-output').value = '';
+            document.getElementById('manual-client-answer-output').value = '';
+        }
+
+        function updateConnectionStatus(connected, text) {
+            const indicator = document.getElementById('connection-status');
+            const dot = document.getElementById('status-dot');
+            const label = document.getElementById('status-text');
+
+            label.innerText = text;
+            if (connected) {
+                indicator.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium";
+                dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+            } else {
+                indicator.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium";
+                dot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+            }
+        }
+
+        // --- HANDLER DE PROTOCOLO DE REDE ---
+        function sendNetworkMessage(type, payload) {
+            if (state.conn && state.conn.open) {
+                state.conn.send({ type, payload });
+            }
+        }
+
+        function handleNetworkMessage(msg) {
+            const { type, payload } = msg;
+
+            switch (type) {
+                case 'REQUEST_INIT_STATE':
+                    if (state.isHost) {
+                        sendNetworkMessage('INIT_STATE', {
+                            terrainSeed: getTerrainHeightmap(),
+                            worms: state.teams,
+                            activeTeam: state.activeTeam,
+                            wind: state.wind
+                        });
+                    }
+                    break;
+
+                case 'INIT_STATE':
+                    buildTerrainFromSeed(payload.terrainSeed);
+                    state.teams = payload.worms;
+                    state.activeTeam = payload.activeTeam;
+                    state.wind = payload.wind;
+                    state.gameStarted = true;
+                    state.winner = null;
+                    hideOverlay();
+                    updateActivePlayerUI();
+                    addLog('[Batalha] Arena de combate recebida. Prepare as suas armas!');
+                    break;
+
+                case 'SYNC_WORM_STATE':
+                    const worm = findWormById(payload.id);
+                    if (worm) {
+                        worm.x = payload.x;
+                        worm.y = payload.y;
+                        worm.vx = payload.vx;
+                        worm.vy = payload.vy;
+                        worm.hp = payload.hp;
+                        worm.facingLeft = payload.facingLeft;
+                    }
+                    break;
+
+                case 'AIM_ANGLE':
+                    state.aimAngle = payload.angle;
+                    break;
+
+                case 'FIRE_SHOT':
+                    triggerVisualFire(payload.x, payload.y, payload.angle, payload.power, payload.weaponId);
+                    break;
+
+                case 'EXPLOSION':
+                    createExplosion(payload.x, payload.y, payload.radius, payload.damage, false);
+                    break;
+
+                case 'TURN_CHANGE':
+                    state.activeTeam = payload.activeTeam;
+                    state.activeWormIndex = payload.activeWormIndex;
+                    state.wind = payload.wind;
+                    state.turnTimeLeft = payload.turnTimeLeft;
+                    state.shotFiredInTurn = false;
+                    updateActivePlayerUI();
+                    addLog(`[Vento] Nova rajada atmosférica: ${(state.wind * 100).toFixed(0)} km/h.`);
+                    break;
+
+                case 'CHAT_MSG':
+                    addChatMessageUI(payload.sender, payload.message, 'text-pink-400');
+                    break;
+
+                case 'RESET_GAME':
+                    resetGame(true);
+                    addLog('[Batalha] O Host reiniciou a arena de combate.');
+                    break;
+            }
+        }
+
+        function isMyTurn() {
+            if (state.mode === 'local') return true;
+            if (state.mode === 'lan') {
+                return (state.isHost && state.activeTeam === 0) || (!state.isHost && state.activeTeam === 1);
+            }
+            return false;
+        }
+
+        // --- SISTEMA DE LOGS E CHAT ---
+        function addLog(text) {
+            const chatBox = document.getElementById('chat-messages');
+            const logEl = document.createElement('div');
+            logEl.className = 'text-slate-400 font-mono text-xs leading-relaxed';
+            logEl.innerHTML = `<span class="text-slate-500">[Info]</span> ${text}`;
+            chatBox.appendChild(logEl);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function addChatMessageUI(sender, text, colorClass = 'text-indigo-400') {
+            const chatBox = document.getElementById('chat-messages');
+            const msgEl = document.createElement('div');
+            msgEl.className = 'text-slate-200';
+            msgEl.innerHTML = `<span class="${colorClass} font-bold">${sender}:</span> ${text}`;
+            chatBox.appendChild(msgEl);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const name = state.mode === 'local' 
+                ? (state.activeTeam === 0 ? 'Equipa Vermelha' : 'Equipa Azul')
+                : (state.isHost ? 'Host (Vermelho)' : 'Aliado (Azul)');
+
+            addChatMessageUI(name, text, state.activeTeam === 0 ? 'text-rose-400' : 'text-blue-400');
+
+            if (state.mode === 'lan') {
+                sendNetworkMessage('CHAT_MSG', { sender: name, message: text });
+            }
+
+            input.value = '';
+        }
+
+        // --- ENCONTRA MINHOCA PELO ID ---
+        function findWormById(id) {
+            for (let team of state.teams) {
+                for (let worm of team.worms) {
+                    if (worm.id === id) return worm;
+                }
+            }
+            return null;
+        }
+
+        // --- GERAÇÃO DE TERRENO DESTRUTÍVEL ---
+        function generateTerrain() {
+            state.terrain = [];
+            for (let x = 0; x < WIDTH; x++) {
+                state.terrain[x] = new Array(HEIGHT).fill(false);
+            }
+
+            const baseHeight = 360;
+            const seed = [];
+            for (let x = 0; x < WIDTH; x++) {
+                let h = baseHeight;
+                h += Math.sin(x * 0.005) * 110;
+                h += Math.sin(x * 0.02) * 25;
+                h += Math.cos(x * 0.01) * 40;
+                if (x < 100) h += (100 - x) * 1.5;
+                if (x > WIDTH - 100) h += (x - (WIDTH - 100)) * 1.5;
+
+                h = Math.max(160, Math.min(HEIGHT - 80, h));
+                seed[x] = h;
+            }
+
+            buildTerrainFromSeed(seed);
+        }
+
+        function getTerrainHeightmap() {
+            const heightMap = [];
+            for (let x = 0; x < WIDTH; x++) {
+                let found = HEIGHT;
+                for (let y = 0; y < HEIGHT; y++) {
+                    if (state.terrain[x][y]) {
+                        found = y;
+                        break;
+                    }
+                }
+                heightMap[x] = found;
+            }
+            return heightMap;
+        }
+
+        function buildTerrainFromSeed(seed) {
+            terrainCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+            state.terrain = [];
+            for (let x = 0; x < WIDTH; x++) {
+                state.terrain[x] = new Array(HEIGHT).fill(false);
+            }
+
+            for (let x = 0; x < WIDTH; x++) {
+                const groundY = Math.floor(seed[x]);
+                
+                terrainCtx.fillStyle = '#1e3a1e'; 
+                terrainCtx.fillRect(x, groundY, 1, HEIGHT - groundY);
+
+                terrainCtx.fillStyle = '#22c55e'; 
+                terrainCtx.fillRect(x, groundY, 1, 10);
+
+                for (let y = groundY; y < HEIGHT; y++) {
+                    state.terrain[x][y] = true;
+                }
+            }
+        }
+
+        function checkCollisions(x, y) {
+            const px = Math.floor(x);
+            const py = Math.floor(y);
+            if (px < 0 || px >= WIDTH) return true; 
+            if (py >= WATER_LEVEL) return true; 
+            if (py < 0) return false; 
+            return state.terrain[px][py];
+        }
+
+        function destroyTerrain(ex, ey, radius) {
+            terrainCtx.save();
+            terrainCtx.globalCompositeOperation = 'destination-out';
+            terrainCtx.beginPath();
+            terrainCtx.arc(ex, ey, radius, 0, Math.PI * 2);
+            terrainCtx.fill();
+            terrainCtx.restore();
+
+            const startX = Math.max(0, Math.floor(ex - radius));
+            const endX = Math.min(WIDTH - 1, Math.floor(ex + radius));
+            const startY = Math.max(0, Math.floor(ey - radius));
+            const endY = Math.min(HEIGHT - 1, Math.floor(ey + radius));
+
+            const rSq = radius * radius;
+            for (let x = startX; x <= endX; x++) {
+                for (let y = startY; y <= endY; y++) {
+                    const dx = x - ex;
+                    const dy = y - ey;
+                    if (dx * dx + dy * dy <= rSq) {
+                        state.terrain[x][y] = false;
+                    }
+                }
+            }
+        }
+
+        function resetGame(fullyRandom = true) {
+            state.gameStarted = true;
+            state.winner = null;
+            state.activeTeam = 0;
+            state.activeWormIndex = { 0: 0, 1: 0 };
+            state.turnTimeLeft = 45;
+            state.wind = (Math.random() * 2 - 1) * MAX_WIND;
+            state.windTarget = state.wind;
+            state.shotFiredInTurn = false;
+            state.projectiles = [];
+            state.particles = [];
+            state.chargePower = 0;
+            state.isCharging = false;
+
+            if (state.isHost && fullyRandom) {
+                generateTerrain();
+                
+                state.teams[0].worms = [];
+                state.teams[1].worms = [];
+
+                const spawnPoints = [
+                    150, 320, 480, 720, 880, 1050
+                ];
+                spawnPoints.sort(() => Math.random() - 0.5);
+
+                for (let i = 0; i < 3; i++) {
+                    const rX = spawnPoints[i];
+                    state.teams[0].worms.push({
+                        id: `red-w-${i}`,
+                        name: `Verme Vermelho ${i+1}`,
+                        x: rX,
+                        y: 0, 
+                        vx: 0,
+                        vy: 0,
+                        hp: 100,
+                        facingLeft: false,
+                        onGround: false,
+                        isDead: false
+                    });
+                }
+
+                for (let i = 3; i < 6; i++) {
+                    const bX = spawnPoints[i];
+                    state.teams[1].worms.push({
+                        id: `blue-w-${i-3}`,
+                        name: `Verme Azul ${i-2}`,
+                        x: bX,
+                        y: 0,
+                        vx: 0,
+                        vy: 0,
+                        hp: 100,
+                        facingLeft: true,
+                        onGround: false,
+                        isDead: false
+                    });
+                }
+
+                if (state.mode === 'lan') {
+                    sendNetworkMessage('INIT_STATE', {
+                        terrainSeed: getTerrainHeightmap(),
+                        worms: state.teams,
+                        activeTeam: state.activeTeam,
+                        wind: state.wind
+                    });
+                }
+            }
+
+            updateActivePlayerUI();
+            updateWeaponsList();
+            hideOverlay();
+            addLog('[Batalha] Uma nova batalha começou! Prepare-se.');
+        }
+
+        function updateActivePlayerUI() {
+            const activeTeamObj = state.teams[state.activeTeam];
+            const display = document.getElementById('active-player-display');
+            
+            if (state.winner) {
+                display.innerText = `Vitória: ${state.winner}!`;
+                display.className = "px-4 py-2 rounded-xl text-white font-bold bg-amber-500 animate-bounce";
+                return;
+            }
+
+            const activeWorm = getActiveWorm();
+            if (activeWorm) {
+                display.innerText = `${activeWorm.name} à vez`;
+                if (state.activeTeam === 0) {
+                    display.className = "px-4 py-2 rounded-xl text-white font-bold bg-rose-600 shadow-md shadow-rose-600/20";
+                } else {
+                    display.className = "px-4 py-2 rounded-xl text-white font-bold bg-blue-600 shadow-md shadow-blue-600/20";
+                }
+            }
+
+            const windVal = document.getElementById('wind-value');
+            const windArrow = document.getElementById('wind-direction-arrow');
+            const windSpeed = Math.abs(state.wind * 200).toFixed(0);
+            windVal.innerText = `${windSpeed} km/h`;
+            if (state.wind >= 0) {
+                windArrow.style.transform = 'rotate(0deg)';
+                windArrow.className = "inline-block text-emerald-400";
+            } else {
+                windArrow.style.transform = 'rotate(180deg)';
+                windArrow.className = "inline-block text-cyan-400";
+            }
+        }
+
+        function getActiveWorm() {
+            const currentTeam = state.teams[state.activeTeam];
+            let activeIdx = state.activeWormIndex[state.activeTeam];
+            
+            for (let i = 0; i < currentTeam.worms.length; i++) {
+                const idx = (activeIdx + i) % currentTeam.worms.length;
+                if (!currentTeam.worms[idx].isDead) {
+                    state.activeWormIndex[state.activeTeam] = idx;
+                    return currentTeam.worms[idx];
+                }
+            }
+            return null; 
+        }
+
+        function updateWeaponsList() {
+            const parent = document.getElementById('weapons-list');
+            parent.innerHTML = '';
+
+            WEAPONS.forEach((wpn, idx) => {
+                const btn = document.createElement('button');
+                const isSelected = state.selectedWeaponIndex === idx;
+                
+                btn.className = `p-3 rounded-xl border text-left flex flex-col justify-between transition-all relative overflow-hidden ${
+                    isSelected 
+                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300' 
+                    : 'border-slate-800 bg-slate-950/80 hover:border-slate-700 text-slate-400'
+                }`;
+
+                const countStr = wpn.count === -1 ? '∞' : `${wpn.count}`;
+                
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between gap-1 w-full">
+                        <span class="font-bold text-sm text-slate-100">${wpn.name}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold">${countStr}</span>
+                    </div>
+                    <span class="text-[10px] mt-1 text-slate-400 leading-tight">${wpn.description}</span>
+                `;
+
+                btn.addEventListener('click', () => {
+                    if (!isMyTurn()) return;
+                    state.selectedWeaponIndex = idx;
+                    updateWeaponsList();
+                });
+
+                parent.appendChild(btn);
+            });
+        }
+
+        function fireWeapon() {
+            const activeWorm = getActiveWorm();
+            if (!activeWorm || state.shotFiredInTurn) return;
+
+            const wpn = WEAPONS[state.selectedWeaponIndex];
+            if (wpn.count === 0) {
+                addLog(`[Erro] Sem munição para ${wpn.name}!`);
+                return;
+            }
+
+            const startX = activeWorm.x + Math.cos(state.aimAngle) * 16;
+            const startY = activeWorm.y + Math.sin(state.aimAngle) * 16;
+            const finalPower = state.chargePower;
+
+            if (wpn.count > 0) wpn.count--;
+
+            triggerVisualFire(startX, startY, state.aimAngle, finalPower, wpn.id);
+
+            if (state.mode === 'lan') {
+                sendNetworkMessage('FIRE_SHOT', {
+                    x: startX,
+                    y: startY,
+                    angle: state.aimAngle,
+                    power: finalPower,
+                    weaponId: wpn.id
+                });
+            }
+
+            updateWeaponsList();
+        }
+
+        function triggerVisualFire(x, y, angle, power, weaponId) {
+            const wpn = WEAPONS.find(w => w.id === weaponId);
+            if (!wpn) return;
+
+            audio.playShoot();
+            state.shotFiredInTurn = true;
+
+            if (wpn.type === 'target') {
+                const targetX = x;
+                for (let i = -2; i <= 2; i++) {
+                    state.projectiles.push({
+                        id: Math.random().toString(),
+                        x: targetX + i * 40,
+                        y: -50,
+                        vx: 1.5,
+                        vy: 4 + Math.random() * 2,
+                        radius: 3,
+                        type: 'missile',
+                        weaponRef: wpn,
+                        bounces: 0
+                    });
+                }
+            } else {
+                const velX = Math.cos(angle) * power * wpn.speedFactor;
+                const velY = Math.sin(angle) * power * wpn.speedFactor;
+
+                state.projectiles.push({
+                    id: Math.random().toString(),
+                    x: x,
+                    y: y,
+                    vx: velX,
+                    vy: velY,
+                    radius: wpn.type === 'bouncing' ? 6 : 4,
+                    type: wpn.type,
+                    weaponRef: wpn,
+                    bounces: 0,
+                    lifeTimer: wpn.type === 'bouncing' ? 180 : 0 
+                });
+            }
+
+            state.chargePower = 0;
+            startPostShotTimer();
+        }
+
+        function startPostShotTimer() {
+            if (state.postShotTimer) clearTimeout(state.postShotTimer);
+            state.turnTimeLeft = 6; 
+            state.postShotTimer = setTimeout(() => {
+                if (state.projectiles.length === 0) {
+                    nextTurn();
+                }
+            }, 6000);
+        }
+
+        function createExplosion(ex, ey, radius, damage, triggerNetwork = true) {
+            audio.playExplosion();
+
+            for (let i = 0; i < 35; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 2;
+                state.particles.push({
+                    x: ex,
+                    y: ey,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: Math.random() > 0.5 ? '#f97316' : '#ef4444',
+                    radius: Math.random() * 4 + 2,
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+
+            destroyTerrain(ex, ey, radius);
+
+            state.teams.forEach(team => {
+                team.worms.forEach(worm => {
+                    if (worm.isDead) return;
+
+                    const dx = worm.x - ex;
+                    const dy = worm.y - ey;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < radius) {
+                        const proximityFactor = (radius - dist) / radius;
+                        const finalDamage = Math.floor(damage * proximityFactor);
+                        
+                        worm.hp -= finalDamage;
+
+                        const pushForce = proximityFactor * 8;
+                        const angle = Math.atan2(dy, dx);
+                        worm.vx += Math.cos(angle) * pushForce;
+                        worm.vy += Math.sin(angle) * pushForce - 2; 
+                        worm.onGround = false;
+
+                        addLog(`[Batalha] ${worm.name} sofreu ${finalDamage} de dano!`);
+
+                        if (worm.hp <= 0) {
+                            worm.isDead = true;
+                            addLog(`[Derrota] ${worm.name} foi eliminado!`);
+                        }
+
+                        syncWormState(worm);
+                    }
+                });
+            });
+
+            if (state.mode === 'lan' && state.isHost && triggerNetwork) {
+                sendNetworkMessage('EXPLOSION', { x: ex, y: ey, radius, damage });
+            }
+
+            checkVictoryConditions();
+        }
+
+        function syncWormState(worm) {
+            if (state.mode === 'lan' && state.isHost) {
+                sendNetworkMessage('SYNC_WORM_STATE', {
+                    id: worm.id,
+                    x: worm.x,
+                    y: worm.y,
+                    vx: worm.vx,
+                    vy: worm.vy,
+                    hp: worm.hp,
+                    facingLeft: worm.facingLeft
+                });
+            }
+        }
+
+        function nextTurn() {
+            if (state.postShotTimer) clearTimeout(state.postShotTimer);
+            
+            state.activeTeam = state.activeTeam === 0 ? 1 : 0;
+            state.shotFiredInTurn = false;
+            state.turnTimeLeft = 45;
+
+            const team = state.teams[state.activeTeam];
+            const nextIdx = (state.activeWormIndex[state.activeTeam] + 1) % team.worms.length;
+            state.activeWormIndex[state.activeTeam] = nextIdx;
+
+            state.wind = (Math.random() * 2 - 1) * MAX_WIND;
+
+            const activeWorm = getActiveWorm();
+            if (activeWorm) {
+                state.aimAngle = activeWorm.facingLeft ? Math.PI + Math.PI / 4 : -Math.PI / 4;
+            }
+
+            updateActivePlayerUI();
+
+            if (state.mode === 'lan' && state.isHost) {
+                sendNetworkMessage('TURN_CHANGE', {
+                    activeTeam: state.activeTeam,
+                    activeWormIndex: state.activeWormIndex,
+                    wind: state.wind,
+                    turnTimeLeft: state.turnTimeLeft
+                });
+            }
+        }
+
+        function checkVictoryConditions() {
+            const redAlive = state.teams[0].worms.some(w => !w.isDead);
+            const blueAlive = state.teams[1].worms.some(w => !w.isDead);
+
+            if (!redAlive && !blueAlive) {
+                declareWinner('Empate');
+            } else if (!redAlive) {
+                declareWinner(state.teams[1].name);
+            } else if (!blueAlive) {
+                declareWinner(state.teams[0].name);
+            }
+        }
+
+        function declareWinner(winnerName) {
+            state.winner = winnerName;
+            state.gameStarted = false;
+            
+            if (winnerName.includes('Vermelha')) state.stats.winsRed++;
+            if (winnerName.includes('Azul')) state.stats.winsBlue++;
+
+            updateActivePlayerUI();
+            showOverlay(
+                'Fim de Combate!',
+                `Vencedor: ${winnerName}. Pretende jogar outra ronda?`,
+                'Jogar Novamente'
+            );
+        }
+
+        let lastTime = 0;
+        let timerAccumulator = 0;
+
+        function gameLoop(time) {
+            const dt = (time - lastTime) / 1000;
+            lastTime = time;
+
+            if (state.gameStarted && !state.winner) {
+                updatePhysics();
+                
+                timerAccumulator += dt;
+                if (timerAccumulator >= 1) {
+                    timerAccumulator = 0;
+                    if (state.turnTimeLeft > 0) {
+                        state.turnTimeLeft--;
+                        document.getElementById('turn-timer').innerText = `${state.turnTimeLeft}s`;
+                    } else if (isMyTurn()) {
+                        nextTurn(); 
+                    }
+                }
+            }
+
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updatePhysics() {
+            const activeWorm = getActiveWorm();
+
+            if (activeWorm && !activeWorm.isDead && !state.shotFiredInTurn && isMyTurn()) {
+                let moved = false;
+
+                if (state.movingLeft) {
+                    activeWorm.vx = -1.5;
+                    activeWorm.facingLeft = true;
+                    moved = true;
+                } else if (state.movingRight) {
+                    activeWorm.vx = 1.5;
+                    activeWorm.facingLeft = false;
+                    moved = true;
+                } else {
+                    activeWorm.vx = 0;
+                }
+
+                if (state.aimingUp) {
+                    state.aimAngle -= 0.03;
+                    if (state.mode === 'lan') sendNetworkMessage('AIM_ANGLE', { angle: state.aimAngle });
+                }
+                if (state.aimingDown) {
+                    state.aimAngle += 0.03;
+                    if (state.mode === 'lan') sendNetworkMessage('AIM_ANGLE', { angle: state.aimAngle });
+                }
+
+                if (state.isCharging) {
+                    state.chargePower += 0.15;
+                    if (state.chargePower > 10) state.chargePower = 10; 
+                }
+
+                if (moved) {
+                    let targetY = activeWorm.y;
+                    let stepHeight = 0;
+                    const testX = activeWorm.x + activeWorm.vx;
+                    
+                    while (stepHeight < 12 && checkCollisions(testX, targetY)) {
+                        targetY--;
+                        stepHeight++;
+                    }
+
+                    if (stepHeight < 12) {
+                        activeWorm.x = testX;
+                        activeWorm.y = targetY;
+                    }
+                    
+                    syncWormState(activeWorm);
+                }
+            }
+
+            state.teams.forEach(team => {
+                team.worms.forEach(worm => {
+                    if (worm.isDead) return;
+
+                    if (!worm.onGround) {
+                        worm.vy += GRAVITY;
+                        worm.x += worm.vx; 
+                    }
+                    worm.y += worm.vy;
+
+                    const groundCheck = checkCollisions(worm.x, worm.y + 1);
+                    if (groundCheck) {
+                        if (worm.vy > 6) { 
+                            const fallDamage = Math.floor((worm.vy - 5) * 8);
+                            worm.hp -= fallDamage;
+                            addLog(`[Combate] ${worm.name} caiu mal e sofreu ${fallDamage} de dano.`);
+                            if (worm.hp <= 0) {
+                                worm.isDead = true;
+                                addLog(`[Derrota] ${worm.name} morreu na queda.`);
+                            }
+                            syncWormState(worm);
+                        }
+                        worm.vy = 0;
+                        worm.vx = 0; 
+                        worm.onGround = true;
+
+                        while (checkCollisions(worm.x, worm.y)) {
+                            worm.y--;
+                        }
+                    } else {
+                        worm.onGround = false;
+                    }
+
+                    if (worm.y >= WATER_LEVEL) {
+                        worm.isDead = true;
+                        worm.hp = 0;
+                        audio.playSplash();
+                        addLog(`[Perigo] ${worm.name} afogou-se na água profunda!`);
+                        createWaterSplash(worm.x, WATER_LEVEL);
+                        checkVictoryConditions();
+                    }
+                });
+            });
+
+            for (let i = state.projectiles.length - 1; i >= 0; i--) {
+                const p = state.projectiles[i];
+                
+                if (p.weaponRef.id === 'bazooka') {
+                    p.vx += state.wind * 0.15;
+                }
+                p.vy += GRAVITY * 0.7; 
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (Math.random() > 0.4) {
+                    state.particles.push({
+                        x: p.x,
+                        y: p.y,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        color: 'rgba(226, 232, 240, 0.4)',
+                        radius: Math.random() * 3 + 1,
+                        alpha: 0.6,
+                        decay: 0.02
+                    });
+                }
+
+                const hit = checkCollisions(p.x, p.y);
+                const outOfLeftRight = p.x < 0 || p.x >= WIDTH;
+
+                if (hit || outOfLeftRight) {
+                    if (p.type === 'bouncing' && p.bounces < 3 && !outOfLeftRight) {
+                        p.vx = -p.vx * 0.55;
+                        p.vy = -p.vy * 0.55;
+                        p.bounces++;
+                        audio.playJump(); 
+                    } else {
+                        createExplosion(p.x, p.y, p.weaponRef.radius, p.weaponRef.damage);
+                        state.projectiles.splice(i, 1);
+                        continue;
+                    }
+                }
+
+                if (p.type === 'bouncing') {
+                    p.lifeTimer--;
+                    if (p.lifeTimer <= 0) {
+                        createExplosion(p.x, p.y, p.weaponRef.radius, p.weaponRef.damage);
+                        state.projectiles.splice(i, 1);
+                        continue;
+                    }
+                }
+
+                if (p.y >= WATER_LEVEL) {
+                    audio.playSplash();
+                    createWaterSplash(p.x, WATER_LEVEL);
+                    state.projectiles.splice(i, 1);
+                    continue;
+                }
+            }
+
+            for (let i = state.particles.length - 1; i >= 0; i--) {
+                const pt = state.particles[i];
+                pt.x += pt.vx;
+                pt.y += pt.vy;
+                pt.alpha -= pt.decay;
+
+                if (pt.alpha <= 0 || pt.y >= WATER_LEVEL) {
+                    state.particles.splice(i, 1);
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+            skyGrad.addColorStop(0, '#090d16');
+            skyGrad.addColorStop(0.6, '#131230');
+            skyGrad.addColorStop(0.9, '#22193b');
+            skyGrad.addColorStop(1, '#2c1e38');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            drawSkyBackground();
+            ctx.drawImage(terrainCanvas, 0, 0);
+
+            state.teams.forEach((team, teamIdx) => {
+                team.worms.forEach(worm => {
+                    if (worm.isDead) return;
+
+                    const isActive = getActiveWorm() === worm && !state.winner;
+
+                    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                    ctx.beginPath();
+                    ctx.ellipse(worm.x, worm.y + 4, 11, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = team.color;
+                    ctx.strokeStyle = '#020617';
+                    ctx.lineWidth = 1.5;
+
+                    ctx.beginPath();
+                    ctx.arc(worm.x, worm.y - 6, 8, 0, Math.PI * 2);
+                    ctx.arc(worm.x, worm.y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff';
+                    const eyeOffsetX = worm.facingLeft ? -4 : 2;
+                    ctx.beginPath();
+                    ctx.arc(worm.x + eyeOffsetX, worm.y - 7, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#000000';
+                    ctx.beginPath();
+                    ctx.arc(worm.x + eyeOffsetX + (worm.facingLeft ? -0.5 : 0.5), worm.y - 7, 1.2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (isActive) {
+                        ctx.fillStyle = '#fbbf24'; 
+                        ctx.beginPath();
+                        ctx.moveTo(worm.x - 5, worm.y - 13);
+                        ctx.lineTo(worm.x, worm.y - 18);
+                        ctx.lineTo(worm.x + 5, worm.y - 13);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+                    ctx.fillRect(worm.x - 22, worm.y - 28, 44, 4);
+
+                    ctx.fillStyle = worm.hp > 30 ? '#10b981' : '#ef4444';
+                    ctx.fillRect(worm.x - 22, worm.y - 28, 44 * (worm.hp / 100), 4);
+
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.font = 'bold 9px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(worm.hp.toString(), worm.x, worm.y - 32);
+
+                    if (isActive) {
+                        const bounceY = worm.y - 44 - Math.abs(Math.sin(Date.now() * 0.006) * 5);
+                        ctx.fillStyle = team.color;
+                        ctx.beginPath();
+                        ctx.moveTo(worm.x - 6, bounceY);
+                        ctx.lineTo(worm.x + 6, bounceY);
+                        ctx.lineTo(worm.x, bounceY + 6);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                });
+            });
+
+            if (isMyTurn() && !state.shotFiredInTurn && !state.winner) {
+                const activeWorm = getActiveWorm();
+                if (activeWorm) {
+                    const aimX = activeWorm.x + Math.cos(state.aimAngle) * 24;
+                    const aimY = activeWorm.y + Math.sin(state.aimAngle) * 24;
+
+                    ctx.strokeStyle = '#a5b4fc';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([3, 3]);
+                    ctx.beginPath();
+                    ctx.arc(activeWorm.x, activeWorm.y, 24, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    ctx.strokeStyle = '#f43f5e';
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    ctx.moveTo(activeWorm.x, activeWorm.y);
+                    ctx.lineTo(aimX, aimY);
+                    ctx.stroke();
+
+                    if (state.isCharging) {
+                        const barW = 50;
+                        const barH = 7;
+                        const barX = activeWorm.x - barW / 2;
+                        const barY = activeWorm.y - 48;
+
+                        ctx.fillStyle = '#475569';
+                        ctx.fillRect(barX, barY, barW, barH);
+
+                        const activeW = barW * (state.chargePower / 10);
+                        const pGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+                        pGrad.addColorStop(0, '#fde047');
+                        pGrad.addColorStop(1, '#ef4444');
+                        ctx.fillStyle = pGrad;
+                        ctx.fillRect(barX, barY, activeW, barH);
+
+                        ctx.strokeStyle = '#020617';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(barX, barY, barW, barH);
+                    }
+                }
+            }
+
+            state.projectiles.forEach(p => {
+                ctx.fillStyle = p.type === 'bouncing' ? '#f59e0b' : '#ef4444';
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                if (p.weaponRef.id === 'bazooka') {
+                    ctx.fillStyle = '#f97316';
+                    ctx.beginPath();
+                    ctx.arc(p.x - p.vx * 1.5, p.y - p.vy * 1.5, p.radius * 0.7, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            state.particles.forEach(pt => {
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = pt.alpha;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1.0; 
+
+            drawWater();
+        }
+
+        function drawSkyBackground() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+            for (let i = 0; i < 40; i++) {
+                const sX = (i * 127) % WIDTH;
+                const sY = (i * 83) % (HEIGHT - 250);
+                const size = (i % 3 === 0) ? 1.5 : 0.8;
+                ctx.fillRect(sX, sY, size, size);
+            }
+
+            ctx.fillStyle = '#f1f5f9';
+            ctx.beginPath();
+            ctx.arc(1050, 90, 32, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#131230';
+            ctx.beginPath();
+            ctx.arc(1038, 90, 32, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawWater() {
+            const waveOffset = Math.sin(Date.now() * 0.003) * 6;
+            
+            const waterGrad = ctx.createLinearGradient(0, WATER_LEVEL, 0, HEIGHT);
+            waterGrad.addColorStop(0, 'rgba(14, 116, 144, 0.85)');
+            waterGrad.addColorStop(1, 'rgba(15, 23, 42, 0.98)');
+            
+            ctx.fillStyle = waterGrad;
+            ctx.beginPath();
+            ctx.moveTo(0, WATER_LEVEL + waveOffset);
+            
+            for (let x = 0; x <= WIDTH; x += 30) {
+                const dy = Math.sin((x * 0.015) + (Date.now() * 0.004)) * 4;
+                ctx.lineTo(x, WATER_LEVEL + waveOffset + dy);
+            }
+            ctx.lineTo(WIDTH, HEIGHT);
+            ctx.lineTo(0, HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = '#22d3ee';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(0, WATER_LEVEL + waveOffset);
+            for (let x = 0; x <= WIDTH; x += 30) {
+                const dy = Math.sin((x * 0.015) + (Date.now() * 0.004)) * 4;
+                ctx.lineTo(x, WATER_LEVEL + waveOffset + dy);
+            }
+            ctx.stroke();
+        }
+
+        function createWaterSplash(x, y) {
+            for (let i = 0; i < 15; i++) {
+                const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.6;
+                const speed = Math.random() * 5 + 3;
+                state.particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: '#22d3ee',
+                    radius: Math.random() * 4 + 1.5,
+                    alpha: 0.9,
+                    decay: 0.03
+                });
+            }
+        }
+
+        function showOverlay(title, msg, btnText) {
+            const ov = document.getElementById('game-overlay');
+            const oContent = document.getElementById('overlay-content');
+            
+            document.getElementById('overlay-title').innerText = title;
+            document.getElementById('overlay-message').innerText = msg;
+            
+            const btn = document.getElementById('overlay-action-btn');
+            btn.innerText = btnText;
+
+            ov.classList.remove('pointer-events-none', 'opacity-0');
+            ov.classList.add('opacity-100');
+            oContent.classList.remove('scale-95');
+            oContent.classList.add('scale-100');
+        }
+
+        function hideOverlay() {
+            const ov = document.getElementById('game-overlay');
+            const oContent = document.getElementById('overlay-content');
+            
+            ov.classList.add('pointer-events-none', 'opacity-0');
+            ov.classList.remove('opacity-100');
+            oContent.classList.add('scale-95');
+            oContent.classList.remove('scale-100');
+        }
+    </script>
+</body>
+</html>
